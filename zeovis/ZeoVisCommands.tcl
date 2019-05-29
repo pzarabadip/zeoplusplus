@@ -13,25 +13,25 @@ proc initialize {} {
     global available_colors
     global color_list
     global draw_count
-    
+
     set draw_count 0
-    
+
     set index [lsearch $available_colors black]
     if {$index != -1} {
         set available_colors [lreplace $available_colors $index $index]
     }
-    
+
     foreach type $element_types {
         global "num_$type\s"
         global "draw_$type\_log"
         global "draw_$type\_count"
-        
+
         set num_elements [subst "\$num_$type\s"]
         for {set i 0} {$i < $num_elements} {incr i} {
             set "draw_$type\_log($i)" [dict create]
         }
     }
-    
+
     set colorIndex 0
     foreach type $colorable_types {
         global "num_$type\s"
@@ -39,16 +39,16 @@ proc initialize {} {
         global "$type\Colors"
         set num_elements [subst "\$num_$type\s"]
         set newColor [lindex $color_list $colorIndex]
-        
+
         puts "COLORED $type $newColor"
-        
+
         for {set i 0} {$i < $num_elements} {incr i} {
             set "$type\Colors($i)" $newColor
             set "old_$type\_colors($i)" {}
         }
         incr colorIndex
     }
-    
+
     foreach type $sizeable_types {
         global "num_$type\s"
         global "old_$type\_radii"
@@ -57,7 +57,7 @@ proc initialize {} {
             set "old_$type\_radii($i)" {}
         }
     }
-    
+
     set list_of_actions {}
     set probe_radius -1
     return ""
@@ -111,15 +111,15 @@ proc show_trans_helper {type index extra_args} {
     set da [lindex $extra_args 0]
     set db [lindex $extra_args 1]
     set dc [lindex $extra_args 2]
-    
+
     set item_name "$type\s($index)"
     set old_record [subst "\$$item_name"]
-    
+
     set result {}
     foreach line $old_record {
         lappend result [translate_command $line $da $db $dc]
     }
-    
+
     set $item_name $result
     show_helper $type $index $extra_args
     set $item_name $old_record
@@ -169,7 +169,7 @@ proc undo {} {
     for {set i 0} {$i < $numPairs} {incr i} {
         set element_name  [lindex $last_action [expr 2 * $i]]
         set indices [lindex $last_action [expr 1 + [expr 2 * $i]]]
-        
+
         if {[string first "color_" $element_name] != -1} {
             set type [string range $element_name 6 end];
             revert color $type $indices
@@ -250,7 +250,7 @@ proc do_all {proc_name log_prefix type msg_name {extra_args {}}}  {
         eval $command
         incr actionCount
     }
-    
+
     if {[string compare $log_prefix "revert_"] != 0} {
         global list_of_actions
         if {[is_collapseable $proc_name]} {
@@ -327,25 +327,25 @@ proc show_helper {type index extra_args} {
     global list_of_actions draw_count
     global "draw_$type\_log" "$type\s" "$type\Colors" nodeColors vorcellColors
     global atomRadii nodeRadii sphere_resolution
-    
+
     set vec [expr [lindex $extra_args 0] + 4][expr [lindex $extra_args 1] + 4][expr [lindex $extra_args 2] + 4]
     if {[dict exists [subst "\$draw\_$type\_log($index)"] $vec]} {
         return -1
     }
-    
+
     incr "draw_$type\_count($index)"
-    
+
     set suffix "s($index)"
     set element [subst "\$$type$suffix"]
     set draw_id_list {}
-    
+
     foreach line $element {
         set command [subst $line]
         set id [draw $command]
         lappend draw_id_list $id
         set draw_count $id
     }
-    
+
     lappend list_of_actions [list "draw_$type" "$index\_$vec"]
     dict set [subst "draw_$type\_log($index)"] $vec $draw_id_list
     return "$type #$index DRAWN"
@@ -364,7 +364,7 @@ proc hide_trans_helper {type index extra_args} {
     if {[dict exists [subst "\$draw\_$type\_log($index)"] $vec]} {
         set values [dict get [subst "\$draw\_$type\_log($index)"] $vec]
         set [subst "draw\_$type\_log($index)"] [dict remove [subst "\$draw\_$type\_log($index)"] $vec]
-        
+
         for {set i 0} {$i < [llength $values]} {incr i} {
             foreach drawID $values {draw delete $drawID}
         }
@@ -392,21 +392,21 @@ proc hide_all_images_helper {type index extra_args} {
     global "draw_$type\_log"
     global list_of_actions
     set logname "draw_$type\_log($index)"
-    
+
     if {[dict size [subst "\$draw\_$type\_log($index)"]] == 0} {
         return -1
     }
-    
+
     set keys   [dict keys   [subst "\$draw\_$type\_log($index)"]]
     set values [dict values [subst "\$draw\_$type\_log($index)"]]
-    
+
     set actions ""
     for {set i 0} {$i < [llength $keys]} {incr i} {
         foreach drawID [lindex $values $i] {draw delete $drawID}
         set key [lindex $keys $i]
         append actions "hide_$type $index\_$key "
     }
-    
+
     set "draw_$type\_log($index)" [dict create]
     lappend list_of_actions $actions
     return "$type #$index HIDDEN"
@@ -418,7 +418,7 @@ proc color {newColor type {indices 0}} {
     checkElementTypes $type $colorable_types
     checkElementTypes $newColor $available_colors
     helperInvoker "color_helper" $type $indices "color_" "$type\s COLORED $newColor" [list $newColor]
-    
+
     if {[expr [string compare $type node] == 0]} {
         all_updater vorcell
         all_updater vornet
@@ -445,7 +445,7 @@ proc adjust_size {radiusChange type {indices 0}} {
     global sizeable_types
     checkElementTypes $type $sizeable_types
     helperInvoker "adjust_size_helper" $type $indices "size_" "$type\s RADIUS CHANGED BY $radiusChange" [list $radiusChange]
-    
+
     if {[expr [string compare $type node] == 0]} {
         all_updater vorcell
         all_updater vornet
@@ -485,7 +485,7 @@ proc size {newRadius type {indices 0}} {
     global sizeable_types
     checkElementTypes $type $sizeable_types
     helperInvoker "size_helper" $type $indices "size_" "$type\s RADIUS SET TO $newRadius" [list $newRadius]
-    
+
     if {[expr [string compare $type node] == 0]} {
         all_updater vorcell
         all_updater vornet
@@ -508,7 +508,7 @@ proc scale {factor type {indices 0}} {
     global sizeable_types
     checkElementTypes $type $sizeable_types
     helperInvoker "scale_helper" $type $indices "size_" "$type\s SCALED BY A FACTOR OF $factor" [list $factor]
-    
+
     if {[expr [string compare $type node] == 0]} {
         all_updater vorcell
         all_updater vornet
@@ -602,17 +602,19 @@ proc revert_helper {type index extra_args} {
         return "$characteristic OF $type #$index HAS NO PREVIOUS VALUE"
     }
 }
+proc sample_acc_nodes{probeRad} {
+  global inputFile
+  run_network_program [list "-r" "-axs" $probeRad "ZeoVisInput.axs" $inputFile]
+}
 
-proc color_code_nodes {probeRad} {
+proc color_code_nodes {} {
     global num_nodes
     global axs_node_color
     global inaxs_node_color
-    global inputFile
-    run_network_program [list "-r" "-axs" $probeRad "ZeoVisInput.axs" $inputFile]
     set fp [open "ZeoVisInput.axs" r]
     set file_data [read $fp]
     set nodeID 0
-    
+
     set new_list_actions {}
     foreach line $file_data {
         if {[string compare $line "true"] == 0} {
@@ -622,9 +624,9 @@ proc color_code_nodes {probeRad} {
         }
         incr nodeID
     }
-    
+
     remove_file "ZeoVisInput.axs"
-    
+
     global list_of_actions
     set list_of_actions [lrange $list_of_actions 0 [expr [llength $list_of_actions] - [expr $num_nodes + 1]]]
     lappend list_of_actions {color_node all}
@@ -637,13 +639,13 @@ proc sample_ray_atom {chanRad probeRad  numSamples} {
     set fp [open "ZeoVisInput.zray_atom"]
     set file_data [read $fp]
     set first_index $draw_count
-    
+
     foreach line $file_data {
         draw $line
         set draw_count [expr $draw_count + 1]
     }
     set last_index [expr $draw_count - 1]
-    
+
     if {$last_index >= $first_index} {
         lappend list_of_actions [list "sample_ray_atom" [list $first_index "to" $last_index]]
     }
@@ -656,13 +658,13 @@ proc draw_ray_file {} {
     set fp [open "ZeoVisInput.zray_file"]
     set file_data [read $fp]
     set first_index $draw_count
-    
+
     foreach line $file_data {
         draw $line
         set draw_count [expr $draw_count + 1]
     }
     set last_index [expr $draw_count - 1]
-    
+
     if {$last_index >= $first_index} {
         lappend list_of_actions [list "sample_ray_atom" [list $first_index "to" $last_index]]
     }
@@ -676,13 +678,13 @@ proc sample_ray_sphere {chanRad probeRad numSamples} {
     set fp [open "ZeoVisInput.zray_sphere"]
     set file_data [read $fp]
     set first_index $draw_count
-    
+
     foreach line $file_data {
         draw $line
         set draw_count [expr $draw_count + 1]
     }
     set last_index [expr $draw_count - 1]
-    
+
     if {$last_index >= $first_index} {
         lappend list_of_actions [list "sample_ray_sphere" [list $first_index "to" $last_index]]
     }
@@ -695,13 +697,13 @@ proc sample_ray_node {chanRad probeRad numSamples} {
     set fp [open "ZeoVisInput.zray_node"]
     set file_data [read $fp]
     set first_index $draw_count
-    
+
     foreach line $file_data {
         draw $line
         set draw_count [expr $draw_count + 1]
     }
     set last_index [expr $draw_count - 1]
-    
+
     if {$last_index >= $first_index} {
         lappend list_of_actions [list "sample_ray_node" [list $first_index "to" $last_index]]
     }
@@ -715,13 +717,13 @@ proc sample_ray_andrew_sphere {chanRad probeRad  numSamples} {
     set fp [open "ZeoVisInput.zray_andrew_sphere"]
     set file_data [read $fp]
     set first_index $draw_count
-    
+
     foreach line $file_data {
         draw $line
         set draw_count [expr $draw_count + 1]
     }
     set last_index [expr $draw_count - 1]
-    
+
     if {$last_index >= $first_index} {
         lappend list_of_actions [list "sample_ray_andrew_sphere" [list $first_index "to" $last_index]]
     }
@@ -734,13 +736,13 @@ proc sample_ray_andrew_atom {chanRad probeRad  numSamples} {
     set fp [open "ZeoVisInput.zray_andrew_atom"]
     set file_data [read $fp]
     set first_index $draw_count
-    
+
     foreach line $file_data {
         draw $line
         set draw_count [expr $draw_count + 1]
     }
     set last_index [expr $draw_count - 1]
-    
+
     if {$last_index >= $first_index} {
         lappend list_of_actions [list "sample_ray_andrew_atom" [list $first_index "to" $last_index]]
     }
@@ -753,13 +755,13 @@ proc sample_surface_area {probeRad numSamples} {
     set fp [open "ZeoVisInput.zsa"]
     set file_data [read $fp]
     set first_index $draw_count
-    
+
     foreach line $file_data {
         draw $line
         set draw_count [expr $draw_count + 1]
     }
     set last_index [expr $draw_count - 1]
-    
+
     if {$last_index >= $first_index} {
         lappend list_of_actions [list "sample_sa" [list $first_index "to" $last_index]]
     }
@@ -771,7 +773,7 @@ proc id_channels {probeRad} {
     global inputFile probe_radius
     global list_of_actions
     set probe_radius $probeRad
-    
+
     if {$num_channels != 0} {
         hide_all_images channel all
         set list_of_actions [lreplace $list_of_actions end end]
@@ -780,23 +782,23 @@ proc id_channels {probeRad} {
         unset channelColors
         unset old_channel_colors
     }
-    
+
     set list_of_actions [lsearch -regexp -all -inline -index 0 -not $list_of_actions ".*channel"]
-    
+
     run_network_program [list "-r" "-zchan" $probeRad "ZeoVisInput.zchan" $inputFile]
     source "ZeoVisInput.zchan"
-    
+
     remove_file "ZeoVisInput.zchan"
     if {$num_channels > 0} {
         puts "$num_channels CHANNELS IDENTIFIED INDEXED 0 THROUGH [expr $num_channels - 1]"
     } else {
         puts "NO CHANNELS WERE IDENTIFIED. THE PROBE SIZE IS TOO LARGE FOR TRAVERSAL. \nTRY A SMALLER PROBE SIZE"
     }
-    
+
     global color_list
     global element_types
     set chanColor [lindex $color_list [lsearch $element_types channel]]
-    
+
     for {set i 0} {$i < $num_channels} {incr i} {
         set channelColors($i)  $chanColor
         set old_channel_colors($i) {}
@@ -828,23 +830,23 @@ proc id_segments {} {
         unset old_segment_colors
         unset  draw_segment_log
     }
-    
+
     set list_of_actions [lsearch -regexp -all -inline -index 0 -not $list_of_actions ".*segment"]
     set num_segments 0
     global num_channels segments probe_radius inputFile segmentColors available_colors
     run_network_program [list "-r" "-zseg" $probe_radius "ZeoVisInput.zseg" $inputFile]
     source "ZeoVisInput.zseg"
     remove_file "ZeoVisInput.zseg"
-    
+
     source "seginfo.data"
     remove_file "seginfo.data"
-    
+
     for {set i 0} {$i < $num_channels} {incr i} {
         set old_seg_index $num_segments
         set num_segments [expr $num_segments + [lindex $seg_counts $i]]
         set new_seg_index [expr $num_segments - 1]
         puts "CHANNEL #$i\'s SEGMENTS INDEXED FROM $old_seg_index TO $new_seg_index"
-        
+
         for {set j $old_seg_index} {$j <= $new_seg_index} {incr j} {
             set draw_segment_log($j) [dict create]
             set segmentColors($j) [lindex $available_colors [expr $j % [llength $available_colors]]]
@@ -866,25 +868,25 @@ proc id_features {} {
         unset old_feature_colors
         unset draw_feature_log
     }
-    
+
     set list_of_actions [lsearch -regexp -all -inline -index 0 -not $list_of_actions ".*feature"]
-    
+
     set num_features 0
     global num_channels probe_radius inputFile available_colors
     run_network_program [list "-r" "-zfeat" $probe_radius "ZeoVisInput.zfeat" $inputFile]
     source "ZeoVisInput.zfeat"
     remove_file "ZeoVisInput.zfeat"
-    
+
     source "featinfo.data"
     remove_file "featinfo.data"
-    
+
     for {set i 0} {$i < $num_channels} {incr i} {
         set old_index $num_features
         set num_features [expr $num_features + [lindex $feat_counts $i]]
         set new_index [expr $num_features - 1]
         puts "CHANNEL #$i\'s FEATURES INDEXED FROM $old_index TO $new_index"
-        
-        
+
+
         for {set j $old_index} {$j <= $new_index} {incr j} {
             set draw_feature_log($j) [dict create]
             set featureColors($j) [lindex $available_colors [expr $j % [llength $available_colors]]]
@@ -906,19 +908,19 @@ proc id_cages {probeRad} {
         unset cageColors
         unset old_cage_colors
     }
-    
+
     set list_of_actions [lsearch -regexp -all -inline -index 0 -not $list_of_actions ".*cage"]
     set num_cages 0
     run_network_program [list "-r" "-zcage" $probeRad "ZeoVisInput.zcage" $inputFile]
     source "ZeoVisInput.zcage"
     remove_file "ZeoVisInput.zcage"
-    
+
     for {set i 0} {$i < $num_cages} {incr i} {
         set draw_cage_log($i) [dict create]
         set cageColors($i) [lindex $available_colors [expr $i % [llength $available_colors]]]
         set old_cage_colors($i) {}
     }
-    
+
     if {$num_cages == 0} {
         return "NO CAGES WERE IDENTIFIED"
     } else {
@@ -942,7 +944,7 @@ proc help {{procName "NONE"}} {
     set special ""
     set indexMsg "VALUES FOR indices: a number, a list such as {1 5 7} or all"
     global sizeable_types colorable_types element_types
-    
+
     if {[string compare $procName "NONE"] == 0} {
         puts "Please specify about which function you'd like more information:"
         list_commands
@@ -1018,7 +1020,7 @@ proc help {{procName "NONE"}} {
         error "ERROR: COMMAND $procName DOES NOT EXIT"
         return
     }
-    
+
     set numArgs [llength [info args $procName]]
     puts "FUNCTION NAME: $procName"
     puts "DESCRIPTION: $description"
@@ -1072,15 +1074,15 @@ proc show_range_helper {type index extra_args} {
     set coord1 [lindex $extra_args 0]; set coord2 [lindex $extra_args 1];
     set minX [lindex $coord1 0];  set minY [lindex $coord1 1];  set minZ [lindex $coord1 2];
     set maxX [lindex $coord2 0];  set maxY [lindex $coord2 1];  set maxZ [lindex $coord2 2];
-    
+
     set minX [max $minX -4]
     set minY [max $minY -4]
     set minZ [max $minZ -4]
-    
+
     set maxX [min $maxX 4]
     set maxY [min $maxY 4]
     set maxZ [min $maxZ 4]
-    
+
     set showCount 0
     for {set i $minX} {$i <= $maxX} {incr i} {
         for {set j $minY} {$j <= $maxY} {incr j} {
@@ -1122,4 +1124,3 @@ proc has_translation {procName} {
     }
     return [expr [lsearch -exact {show hide} $origName] != -1];
 }
-
