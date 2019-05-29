@@ -18,7 +18,7 @@ proc run_network_program {list_of_args} {
 
 proc readFileName {} {
     global filename
-    puts "Please enter the filename of your input file" 
+    puts "Please enter the filename of your input file"
     gets stdin filename
     return ""
 }
@@ -27,14 +27,14 @@ proc checkInputFile {} {
     global filename
     global ending
     if {[string match "*.cuc" $filename]} {
-	set ending ".cuc"
+        set ending ".cuc"
     } elseif {[string match "*.cssr" $filename]} {
-	set ending ".cssr"
+        set ending ".cssr"
     } elseif {[string match "*.cif" $filename]} {
-	set ending ".cif"
+        set ending ".cif"
     } else {
-	puts "ERROR: INPUT FILE MUST BE OF TYPE .cuc or .cssr \nExiting"
-	exit
+        puts "ERROR: INPUT FILE MUST BE OF TYPE .cuc or .cssr \nExiting"
+        exit
     }
 }
 
@@ -58,4 +58,5 @@ set num_segments 0
 set num_features 0
 set num_cages    0
 initialize
-puts "ENJOY ZEOVIS!" 
+puts "ENJOY ZEOVIS!"
+
