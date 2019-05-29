@@ -1,7 +1,8 @@
+# ZeoVis Documentation:
+It provides the documentation on the installation and usage of ZeoVis.
 
-# Getting Started:
-	Install VMD on your computer within a given directory. Compile zeo++ and copy the executable into this directory in addition to the files
-	ZeoVis.tcl and ZeoVisCommands.tcl. Make sure that the executable remains named network.
+## Getting Started:
+Install VMD on your computer within a given directory. Compile zeo++ and copy the executable into this directory in addition to the files [ZeoVis.tcl](ZeoVis.tcl) and [ZeoVisCommands.tcl](ZeoVisCommands.tcl). Make sure that the executable remains named network.
 
 	To start ZeoVis, simply type the following in a shell window:
 	   	 ./vmd -e ZeoVis.tcl
