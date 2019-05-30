@@ -2,11 +2,15 @@
 It provides the documentation on the installation and usage of ZeoVis.
 
 ## Getting Started:
-Install VMD on your computer within a given directory. Compile zeo++ and copy the executable into this directory in addition to the files [ZeoVis.tcl](ZeoVis.tcl) and [ZeoVisCommands.tcl](ZeoVisCommands.tcl). Make sure that the executable remains named network.
+VMD and zeo++ need to be installed/compiled and available
+in environmental path. The zeo++ executable should be named network.  
+[ZeoVis.tcl](ZeoVis.tcl) and [ZeoVisCommands.tcl](ZeoVisCommands.tcl) files should be present in the working directory along with the structure file which you want to use ZeoVis on it.
 To start ZeoVis, simply type the following in a shell window:
 ```
 ./vmd -e ZeoVis.tcl
 ```
+You need to provide the structure filename that can be wither in cif or cssr format. Then, you need to provide the desired accuracy level.
+
 ## Getting Help:
 The most comprehensive help is available within ZeoVis itself. After opening the program, simply type help to obtain
 a list of procedure names. Typing help $command_name will then display information about a given command, including
@@ -118,7 +122,8 @@ Rays can be color-coded according to their lengths.
 Voronoi nodes can be color-coded according to their accessibility. To do so, use the commands:
 ```
 sample_acc_nodes $probRad
-color_code_nodes $probeRad
+color_code_nodes
+show node all
 ```
 Accessible nodes to the probe will be green while inaccessible nodes will be red.
 
