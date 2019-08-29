@@ -1,6 +1,6 @@
 /* Functions of the MATERIAL class
  * (some fragments taken from main()
- * Added by M. Haranczyk, Feb 2014 
+ * Added by M. Haranczyk, Feb 2014
  *
  */
 
@@ -55,7 +55,7 @@ void MATERIAL::AVcalc(double r, int sampleDensity,ostream &output, char *filenam
   if(!AVdoneFlag) NEWcalcAV(pMaterial, r, sampleDensity);
   AVdoneFlag = true;
 
-  NEWcalcAVprint(pMaterial, output,filename); 
+  NEWcalcAVprint(pMaterial, output,filename);
   };
 
 void MATERIAL::AVblockPockets(ostream &output){
@@ -109,8 +109,11 @@ void MATERIAL::ASAreportPoints(ostream &output){
 
 
 /* visVORO FUNCTION */
-void MATERIAL::visualizeVoroNet(char* name, double r, int skel_a, int skel_b, int skel_c){
-  visVoro(name, r, skel_a, skel_b, skel_c, &vornet, &atmnet);
+//void visVoro(char* name, string prefix, double probeRad, int skel_a, int skel_b, int skel_c, VORONOI_NETWORK* vornet, ATOM_NETWORK* atmnet, string *filename_xyz, string *filename2_xyz, string *filename3_xyz) {
+//void visVoro(char* name, string prefix, double probeRad, int skel_a, int skel_b, int skel_c, VORONOI_NETWORK* vornet, ATOM_NETWORK* atmnet) {
+
+void MATERIAL::visualizeVoroNet(char* name, string prefix, double r, int skel_a, int skel_b, int skel_c, string filename_xyz, string filename2_xyz, string filename3_xyz, string filename_vtk, string filename2_vtk, string filename3_vtk){
+  visVoro(name, prefix, r, skel_a, skel_b, skel_c, &vornet, &atmnet, filename_xyz, filename2_xyz, filename3_xyz, filename_vtk, filename2_vtk, filename3_vtk);
   }; // ends visVoro
 
 
@@ -129,7 +132,7 @@ void MATERIAL::PLDcalc(double r, double seg_r, string seg_file, ostream &output,
     } else
     { // segment the network based on provided segment definitions from a file
     accessAnalysis.calculatePLDbasedOnFile(seg_file);
-    accessAnalysis.reportPLD(output);    
+    accessAnalysis.reportPLD(output);
     };
 /*
   MATERIAL *pMaterial = this;
@@ -139,7 +142,7 @@ void MATERIAL::PLDcalc(double r, double seg_r, string seg_file, ostream &output,
 */
   };
 
-// PLDcalc uses molecules present in the periodic box to segment the void space into POREs, then takes the network available to r and analysie PLD between the segments 
+// PLDcalc uses molecules present in the periodic box to segment the void space into POREs, then takes the network available to r and analysie PLD between the segments
 void MATERIAL::PLDcalcFromMolecules(double r, ostream &output, char *filename){
   runVoroFlat();
   accessAnalysis.AccessibilityClassSetup(&atmnet, &orgAtomnet, highAccuracy, rad_con, &vornet, &bvcells, &cells);
@@ -154,7 +157,7 @@ void MATERIAL::PLDvisualize(string basefilename, string visformat){
 
   fstream output;
 
-  // Three data structures storing information about 
+  // Three data structures storing information about
   vector<Point> NodesFracCoord;
   vector<int> NodesSegmentIDs;
   vector<double> NodesSize;
@@ -200,5 +203,3 @@ void MATERIAL::PLDvisualize(string basefilename, string visformat){
 
   output.close();
 }
-
-
