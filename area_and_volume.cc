@@ -1416,15 +1416,11 @@ void determineAccessibility(ATOM_NETWORK *atmnet, double r_probe_chan,
 
 // create diagrams of 1) Voronoi network and 2) accessible Voronoi network in an
 // adjacent cell if specified with shift; xyz and vtk output files generated
-void visVoro(char *name, string prefix, double probeRad, int skel_a, int skel_b,
-             int skel_c, VORONOI_NETWORK *vornet, ATOM_NETWORK *atmnet,
-             string filename_xyz, string filename2_xyz, string filename3_xyz,
-             string filename_vtk, string filename2_vtk, string filename3_vtk) {
-  // void visVoro(char* name, string prefix, double probeRad, int skel_a, int
-  // skel_b, int skel_c, VORONOI_NETWORK* vornet, ATOM_NETWORK* atmnet) {
-  // string filename_xyz = string(name).append("_voro.xyz");
-  // string filename2_xyz = string(name).append("_voro_accessible.xyz");
-  // string filename3_xyz = string(name).append("_voro_nonaccessible.xyz");
+void visVoro(char *name, double probeRad, int skel_a, int skel_b, int skel_c,
+             VORONOI_NETWORK *vornet, ATOM_NETWORK *atmnet) {
+  string filename_xyz = string(name).append("_voro.xyz");
+  string filename2_xyz = string(name).append("_voro_accessible.xyz");
+  string filename3_xyz = string(name).append("_voro_nonaccessible.xyz");
   vector<bool> accessInfo;
   vector<bool> nonaccessInfo;
   vector<CHANNEL> channels;
@@ -1444,9 +1440,6 @@ void visVoro(char *name, string prefix, double probeRad, int skel_a, int skel_b,
     };
 
   // write Voronoi nodes as .xyz
-  // FILE *output_xyz; output_xyz = fopen(filename_xyz, "w");
-  // FILE *output2_xyz; output2_xyz = fopen(filename2_xyz, "w");
-  // FILE *output3_xyz; output3_xyz = fopen(filename3_xyz, "w");
   FILE *output_xyz;
   output_xyz = fopen(filename_xyz.c_str(), "w");
   FILE *output2_xyz;
@@ -1506,9 +1499,9 @@ void visVoro(char *name, string prefix, double probeRad, int skel_a, int skel_b,
   //       when printing (non)accesible network, all nodes are printed first
 
   // write Voronoi edges as .vtk
-  // string filename_vtk = string(name).append("_voro.vtk");
-  // string filename2_vtk = string(name).append("_voro_accessible.vtk");
-  // string filename3_vtk = string(name).append("_voro_nonaccessible.vtk");
+  string filename_vtk = string(name).append("_voro.vtk");
+  string filename2_vtk = string(name).append("_voro_accessible.vtk");
+  string filename3_vtk = string(name).append("_voro_nonaccessible.vtk");
   // start saving the addresses of (non)accessible nodes
   int *accessIndex;
   accessIndex = new int[accessInfo.size()];
@@ -2983,8 +2976,8 @@ void blockPockets(ATOM_NETWORK *atmnet, ostream &output,
       while (num_selected_points > 0) {
         if (debug)
           printf("DEBUG: there are %d points left to be blocked in pore with "
-                 "ID %d\n",
-                 num_selected_points, i);
+                 "ID %d; No. spheres so far = %d\n",
+                 num_selected_points, i, spheres_vector.size());
         int most_dense_index = get_most_dense_index(atmnet, &selected_points);
         Point most_dense =
             selected_points.at(most_dense_index); // find most dense point in
@@ -2999,6 +2992,10 @@ void blockPockets(ATOM_NETWORK *atmnet, ostream &output,
           if (dist < closest_channel || closest_channel < 0)
             closest_channel = dist;
         }
+        if (debug)
+          printf("DEBUG: the closest channel for the most dense of the set of "
+                 "points: %f\n",
+                 closest_channel);
         double furthest_same_pocket =
             0; // distance to furthest MC point that is part of this pore
         vector<double>
@@ -3017,6 +3014,9 @@ void blockPockets(ATOM_NETWORK *atmnet, ostream &output,
           if (dist > furthest_same_pocket || furthest_same_pocket < 0)
             furthest_same_pocket = dist;
           vector_of_distances_to_sphere_centroid.push_back(dist);
+          if (debug)
+            printf("DEBUG: Point %d and its distance to the most dense: %f\n",
+                   j, dist);
         }
 
         // 4) calculate the largest acceptable sphere at this most dense
@@ -3028,21 +3028,24 @@ void blockPockets(ATOM_NETWORK *atmnet, ostream &output,
               sphere_radius_overshoot; // no channels - we can safely have a
                                        // single sphere, inflated by probeRad to
                                        // cover the void space here
-        else if (furthest_same_pocket < closest_channel)
-          radius = min(
-              furthest_same_pocket + probeRad + sphere_radius_overshoot,
-              closest_channel -
-                  (probeRad +
-                   sphere_radius_overshoot)); // there are channels, but none
-                                              // are closer than the furthest
-                                              // point in this pocket, so we can
-                                              // extend the sphere to cover
-                                              // everything; try and inflate the
-                                              // sphere by probeRad to ensure the
-                                              // void space is blocked, but not
-                                              // if this would cause anything
-                                              // within probeRad of an accessible
-                                              // MC point to be blocked
+        //        else if(furthest_same_pocket<closest_channel) radius =
+        //        min(furthest_same_pocket + probeRad + sphere_radius_overshoot,
+        //        closest_channel - (probeRad + sphere_radius_overshoot));
+        //        //there are channels, but none are closer than the furthest
+        //        point in this pocket, so we can extend the sphere to cover
+        //        everything; try and inflate the sphere by probeRad to ensure
+        //        the void space is blocked, but not if this would cause
+        //        anything within probeRad of an accessible MC point to be
+        //        blocked
+        else if (furthest_same_pocket < closest_channel) {
+          radius = furthest_same_pocket + sphere_radius_overshoot;
+          radius = radius + min(probeRad,
+                                0.5 * (closest_channel - furthest_same_pocket));
+        } // there are channels, but none are closer than the furthest point in
+          // this pocket, so we can extend the sphere to cover everything; try
+          // and inflate the sphere by probeRad to ensure the void space is
+          // blocked, but not if this would cause anything within probeRad of an
+          // accessible MC point to be blocked
         else
           radius =
               max(sphere_radius_overshoot,
@@ -3061,6 +3064,9 @@ void blockPockets(ATOM_NETWORK *atmnet, ostream &output,
         new_sphere.z = most_dense[2];
         new_sphere.r = radius;
         spheres_vector.push_back(new_sphere);
+        if (debug)
+          printf("DEBUG: Creating sphere with radious %f\n", radius);
+
         for (int j = num_selected_points - 1; j >= 0;
              j--) { // loop over points to be blocked and eliminate blocked ones
                     // - we iterate backwards so that the vector of distances is
