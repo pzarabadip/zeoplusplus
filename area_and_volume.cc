@@ -1177,11 +1177,10 @@ void determineAccessibility(ATOM_NETWORK *atmnet, double r_probe_chan,
 
 // create diagrams of 1) Voronoi network and 2) accessible Voronoi network in an
 // adjacent cell if specified with shift; xyz and vtk output files generated
-void visVoro(char *name, double probeRad, int skel_a, int skel_b, int skel_c,
-             VORONOI_NETWORK *vornet, ATOM_NETWORK *atmnet) {
-  string filename_xyz = string(name).append("_voro.xyz");
-  string filename2_xyz = string(name).append("_voro_accessible.xyz");
-  string filename3_xyz = string(name).append("_voro_nonaccessible.xyz");
+void visVoro(char *name, string prefix, double probeRad, int skel_a, int skel_b,
+             int skel_c, VORONOI_NETWORK *vornet, ATOM_NETWORK *atmnet,
+             string filename_xyz, string filename2_xyz, string filename3_xyz,
+             string filename_vtk, string filename2_vtk, string filename3_vtk) {
   vector<bool> accessInfo;
   vector<bool> nonaccessInfo;
   vector<CHANNEL> channels;
@@ -1260,9 +1259,9 @@ void visVoro(char *name, double probeRad, int skel_a, int skel_b, int skel_c,
   //       when printing (non)accesible network, all nodes are printed first
 
   // write Voronoi edges as .vtk
-  string filename_vtk = string(name).append("_voro.vtk");
-  string filename2_vtk = string(name).append("_voro_accessible.vtk");
-  string filename3_vtk = string(name).append("_voro_nonaccessible.vtk");
+  // string filename_vtk = string(name).append("_voro.vtk");
+  // string filename2_vtk = string(name).append("_voro_accessible.vtk");
+  // string filename3_vtk = string(name).append("_voro_nonaccessible.vtk");
   // start saving the addresses of (non)accessible nodes
   int *accessIndex;
   accessIndex = new int[accessInfo.size()];
