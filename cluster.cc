@@ -28,7 +28,6 @@ typedef vector<VOR_NODE>::iterator VnIt;
 typedef vector<VOR_EDGE>::iterator VeIt;
 typedef vector<VOR_NODE>::const_iterator VnCit;
 typedef vector<DIJKSTRA_NODE>::iterator DnIt;
-// typedef vector<DIJKSTRA_NODE>::const_iterator DnCit;
 
 /* conn_comp
  * Compares two objects of CONN class defined in graphstorage.h

@@ -4,8 +4,6 @@
 // Create class AtomCluster that will replace a large atom with a cluster
 //	of smaller atoms in a specified configuration
 
-//#include "network.h"
-
 #include <cmath>
 #include <cstring>
 #include <fstream>
@@ -41,22 +39,6 @@ AtomCluster::AtomCluster(ATOM orgatm, double replacementSphereRadii) {
   center.z = orgAtom.z;
   center.radius = smallSphereRadius;
 }
-
-/* old constructures to be removed
-AtomCluster::AtomCluster(XYZ point) {
-        center.x = point.x;
-        center.y = point.y;
-        center.z = point.z;
-        center.radius = smallSphereRadius;
-}
-
-AtomCluster::AtomCluster(double x, double y, double z) {
-        center.x = x;
-        center.y = y;
-        center.z = z;
-        center.radius = smallSphereRadius;
-}
-*/
 
 /* function that updates information about replaced atoms (small particle
    information is updated: mass update, moving to UC, calculation of fractional

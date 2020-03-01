@@ -489,97 +489,6 @@ int main(int argc, char *argv[]) {
                        // default bins
           }
 
-          /* Rich: uses segments
-              else if(command[0].compare("-simpl") == 0){    // This feature is
-             added by Maciek string filename =  processFilename(command, name,
-             ".seglist", 1, 2); if(filename.empty()) {error=true; break;}
-                //  double chan_radius  = strtod(command[1].data(), NULL);
-                double probe_radius = strtod(command[1].data(), NULL);
-                vector<bool> accessInfo;
-                vector<CHANNEL> channels;
-
-                fstream output;
-                output.open(filename.data(), fstream::out);
-                output << calcDeterminant(atmnet.ucVectors) << "\n"
-                       << calcDensity(&atmnet) << "\n";
-                CHANNEL::findChannels(&vornet, probe_radius, &accessInfo,
-             &channels); segmentChannels(&atmnet,&channels,output);
-                output.close();
-
-                // Added by Rich just to get a simple density and volume file
-                fstream output2;
-                string densvol = processFilename(command, name, ".densvol", 1,
-             2); if(densvol.empty()) {error=true; break;}
-                output2.open(densvol.data(), fstream::out);
-                output2 << name << " " << calcDeterminant(atmnet.ucVectors) << "
-             " << calcDensity(&atmnet) << "\n"; output2.close();
-                }
-          */
-          /* Rich: uses segments
-                else if(command[0].compare("-featholo") == 0){    // This
-          feature is added by Maciek&Rich
-                                                                // this should
-          be called segmentholo string filename =  processFilename(command,
-          name, ".featholo", 1, 2); if(filename.empty()) {error=true; break;}
-                double probe_radius = strtod(command[1].data(), NULL);
-                vector<bool> accessInfo;
-                vector<CHANNEL> channels;
-                fstream output;
-          //    output.open(filename.data(), fstream::out);
-                CHANNEL::findChannels(&vornet, probe_radius, &accessInfo,
-          &channels);
-
-                vector <int> vornode_segment_id_info;
-                vector <double> segment_max_r;
-                vornode_segment_id_info.resize(vornet.nodes.size(),0);
-                segmentChannels_forHolograms(&atmnet,&channels,&vornode_segment_id_info,&segment_max_r,0);
-          // 0 is for segments segmentChannels_saveSegments(&atmnet,&vornet,
-          &vornode_segment_id_info,&segment_max_r,segment_max_r.size(),name,(char
-          *)"segment");
-          //Rich: if you want segment holograms use this function
-                  //analyze_accessible_voronoi_with_segments(&vornet,
-          probe_radius,
-          &vornode_segment_id_info,&segment_max_r,segment_max_r.size(),name);
-          //Rich: if you want atom cages, use this function
-                  //analyze_accessible_voronoi_by_atoms(&atmnet, &vornet,
-          probe_radius,
-          &vornode_segment_id_info,&segment_max_r,segment_max_r.size(),name);
-          //      output.close();
-              }
-          */
-          /* Rich: uses segments
-              else if(command[0].compare("-realfeatholo") == 0){    // This
-          feature is added by Maciek
-                                                                    // it does
-          the same as -featholo but for features not segments string filename =
-          processFilename(command, name, ".realfeatholo", 1, 2);
-                if(filename.empty()) {error=true; break;}
-                double probe_radius = strtod(command[1].data(), NULL);
-                vector<bool> accessInfo;
-                vector<CHANNEL> channels;
-                fstream output;
-          //    output.open(filename.data(), fstream::out);
-                CHANNEL::findChannels(&vornet, probe_radius, &accessInfo,
-          &channels);
-
-                vector <int> vornode_feature_id_info;
-                vector <double> feature_max_r;
-                vornode_feature_id_info.resize(vornet.nodes.size(),0);
-                segmentChannels_forHolograms(&atmnet,&channels,&vornode_feature_id_info,&feature_max_r,1);
-          // 1 is for features segmentChannels_saveSegments(&atmnet,&vornet,
-          &vornode_feature_id_info,&feature_max_r,feature_max_r.size(),name,(char
-          *)"feature");
-          //Rich: if you want segment holograms use this function
-                  //analyze_accessible_voronoi_with_segments(&vornet,
-          probe_radius,
-          &vornode_segment_id_info,&segment_max_r,segment_max_r.size(),name);
-          //Rich: if you want atom cages, use this function
-                  //analyze_accessible_voronoi_by_atoms(&atmnet, &vornet,
-          probe_radius,
-          &vornode_segment_id_info,&segment_max_r,segment_max_r.size(),name);
-          //      output.close();
-          }
-          */
           else if (command[0].compare("-chan") == 0) {
             string filename = processFilename(command, name, ".chan", 1, 2);
             if (filename.empty()) {
@@ -1451,7 +1360,8 @@ int main(int argc, char *argv[]) {
           // functionality writes out a number of xyz format files containing
           // spherical substructures of the given radius, centred on given
           // probe-accessible Voronoi nodes; if an element_type is given, a
-          // simplified Voronoi network is used, based only on atoms of that type
+          // simplified Voronoi network is used, based only on atoms of that
+          // type
           else if (command[0].compare("-sphericalSubstructures") == 0) {
             if (command.size() != 3 && command.size() != 4) {
               printf("Error: -sphericalSubstructures option accepts 2 or 3 "
@@ -1507,8 +1417,8 @@ int main(int argc, char *argv[]) {
 
           // flag to write to terminal the size of supercell required in order
           // to satisfy 'minimum image convention' (correct terminology?) - how
-          // many cells in each axis required so that no sphere of a given radius
-          // overlaps with itself periodically
+          // many cells in each axis required so that no sphere of a given
+          // radius overlaps with itself periodically
           else if (command[0].compare("-cellmulti") == 0) {
             if (command.size() != 2) {
               printf("Error: -cellmulti option accepts 1 (sphere radius) "

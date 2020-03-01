@@ -1,4 +1,3 @@
-//#include "network.h"
 #include <cmath>
 
 #include "feature.h"
@@ -1132,47 +1131,6 @@ double FEATURE::calculateSurfaceArea_OLD(ATOM_NETWORK *uc,
       };
     }
   } // end of analysis of object
-
-  // Create a list of spheres that overlap with the current feature
-  /*
-   for(j=0;j<(int)ChanNodeList->size();j++)
-      {
-      int count=0;
-      int count2=0;
-      Point node;
-      node.x=ChanNodeList->at(j).x; node.y=ChanNodeList->at(j).y;
-   node.z=ChanNodeList->at(j).z; node=uc->shiftXYZInUC(node);
-
-      for(int i = 0; i < (int)object.size(); i++){
-         Point p;
-         p.x=object[i].x;p.y=object[i].y;p.z=object[i].z;
-         Point p_shifted=uc->shiftXYZInUC(p);
-
-         double dist = uc->calcDistanceXYZ(p.x,p.y,p.z,node.x,node.y,node.z);
-         if(dist<0.01&&fabs(ChanNodeList->at(j).max_radius*SPHERE_SCALE-object[i].r)<0.01)
-            {
-            count++; break;
-            };
-
-         if(dist<ChanNodeList->at(j).max_radius*SPHERE_SCALE+object[i].r)
-           {
-           count2++;
-           };
-
-         };
-
-      if(count==0) // if node is not a part of the current feature
-        {
-        if(count2>0) {
-          //origDNet->nodes[j] is an sphere overlapping with the current feature
-          sph2.r=ChanNodeList->at(j).max_radius*SPHERE_SCALE;
-          sph2.x=node.x; sph2.y=node.y; sph2.z=node.z;
-          other_object.push_back(sph2);
-          };
-        };
-
-      };
-  */
 
   // New version of code to find overlapping nodes
 

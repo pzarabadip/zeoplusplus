@@ -149,11 +149,11 @@ int main(int argc, char *argv[]) {
     exit(EXIT_FAILURE);
   }
   ATOM_NETWORK basic_cell;
-  bool edges_provided_exhaustively =
-      read_cgd(cgd, &basic_cell,
-               &global_net); // we need to know whether the edges were provided
-                             // exhaustively in the input file or not, so that we
-                             // can reconstruct the missing edges if required!
+  bool edges_provided_exhaustively = read_cgd(
+      cgd, &basic_cell,
+      &global_net); // we need to know whether the edges were provided
+                    // exhaustively in the input file or not, so that we
+                    // can reconstruct the missing edges if required!
   if (!edges_provided_exhaustively)
     add_missing_edges(&basic_cell);
   // if augmenting with 2c vertices, add the vertices and normal edges here -
@@ -249,9 +249,9 @@ int main(int argc, char *argv[]) {
   vector<bool>
       basic_indices_still_basic; // keep track of which basic vertices are
                                  // basic, and which were in fact equivalent by
-                                 // symmetry (should only happen for augmented 2c
-                                 // vertices, but theoretically could also happen
-                                 // for a sloppy topology file)
+                                 // symmetry (should only happen for augmented
+                                 // 2c vertices, but theoretically could also
+                                 // happen for a sloppy topology file)
   for (int i = 0; i < num_basic_vertices; i++)
     basic_indices_still_basic.push_back(false);
   for (int i = 0; i < num_full_vertices; i++) {
@@ -528,8 +528,8 @@ int main(int argc, char *argv[]) {
         if (mol.atoms_type.at(j)[0] == 'Q')
           sites.push_back(
               j); // allow anything beginning with 'Q' to be a site, so that
-                  // distinct sites can be handled (matched to each other, e.g. Q
-                  // could refer to a carboxy connection, while Q1 refers to a
+                  // distinct sites can be handled (matched to each other, e.g.
+                  // Q could refer to a carboxy connection, while Q1 refers to a
                   // nitrogen connection)
         else if (mol.atoms_type.at(j)[0] ==
                  'J') { // anything beginning with 'J' is a dummy site
@@ -797,17 +797,18 @@ int main(int argc, char *argv[]) {
     }
 
     // WE HAVE TO DO IT THIS WAY - ENUMERATE ALL THE POSSIBILITIES, AND THEN RUN
-    // EACH OF THEM scheme for building all possible frameworks based on distinct
-    // molecular alignments begins here
+    // EACH OF THEM scheme for building all possible frameworks based on
+    // distinct molecular alignments begins here
     vector<vector<pair<int, int>>> alignment_options_each_basic_vertex;
     for (int bv = 0; bv < num_basic_vertices; bv++) {
       if (verbose)
         printf("DEBUG: basic vertex %d has these alignment options:\n", bv);
       vector<pair<int, int>>
           alignment_options_this_basic_vertex; // an 'alignment option' is a
-                                               // pair consisting of the molecule
-                                               // index and the alignment index
-                                               // of that molecule
+                                               // pair consisting of the
+                                               // molecule index and the
+                                               // alignment index of that
+                                               // molecule
       int num_molecule_choices_this_basic_vertex =
           basic_oriented_molecules.at(bv).size();
       for (int mc = 0; mc < num_molecule_choices_this_basic_vertex; mc++) {
@@ -870,8 +871,8 @@ int main(int argc, char *argv[]) {
                            // connect a Q1 to a Q2, representing say, a carboxy
                            // connection site and a nitrogen-terminated linker)
         // here we will check whether constructing with this alignment is
-        // possible (based on the different kinds of connection sites that may be
-        // specified)
+        // possible (based on the different kinds of connection sites that may
+        // be specified)
         bool possible = true;
         for (int i = 0; i < num_two_way_connections && possible; i++) {
           CONNECTION c = two_way_connections.at(i);
@@ -981,45 +982,6 @@ int main(int argc, char *argv[]) {
       printf("\tratio of building blocks written to %s\n",
              ratio_file_name.c_str());
 
-      /*
-            //replace "V" with a number in the xyz output files? this will
-         color-code vertices based on their connectivity
-            rename_vertices_by_connectivity = false; //we don't want this for
-         molecular output
-            //print cssr ...
-            string frame_file_name = prefix+"_framework.cssr"; //write framework
-         molecule to cssr file FILE *frame_file =
-         fopen(frame_file_name.c_str(),"w"); if(frame_file==NULL) {
-              printf("ERROR: could not open output cssr file with name %s\n",
-         frame_file_name.c_str()); exit(EXIT_FAILURE);
-            }
-            write_cssr(frame_file, &framework, net_name, frame_file_name);
-            fclose(frame_file);
-            printf("\tcrystallographic structure file written to %s\n",
-         frame_file_name.c_str());
-            //...print vtk ...
-            string vtk_file_name = prefix+"_framework.vtk"; //write framework's
-         unit cell FILE *vtk_file = fopen(vtk_file_name.c_str(),"w");
-            if(vtk_file==NULL) {
-              printf("ERROR: could not open output vtk file with name %s\n",
-         vtk_file_name.c_str()); exit(EXIT_FAILURE);
-            }
-            write_unit_cell(vtk_file, &framework, frame_file_name, false);
-         //is_net? false fclose(vtk_file); printf("\tunit cell written to %s\n",
-         vtk_file_name.c_str());
-            //...and print xyz
-            string xyz_file_name = prefix+"_framework.xyz"; //write framework's
-         atoms FILE *xyz_file = fopen(xyz_file_name.c_str(),"w");
-            if(xyz_file==NULL) {
-              printf("ERROR: could not open output xyz file with name %s\n",
-         xyz_file_name.c_str()); exit(EXIT_FAILURE);
-            }
-            write_vertices(xyz_file, &framework, frame_file_name,
-         rename_vertices_by_connectivity, false); //is_net? false
-            fclose(xyz_file);
-            printf("\tatom coordinates written to %s\n", xyz_file_name.c_str());
-      */
-
       // print cssr ...
       string frame_file_name =
           prefix + "_framework.cssr"; // write framework molecule to cssr file
@@ -1119,8 +1081,8 @@ void construct_framework_from_alignment(
             .at(alignment_choice),
         sym_op, full_cell.sym_ID,
         &full_cell); // apply the appropriate symmetry to the appropriate basic
-                     // oriented molecule - use the underlying cell info to apply
-                     // the sym op in the underlying net fractional space!
+                     // oriented molecule - use the underlying cell info to
+                     // apply the sym op in the underlying net fractional space!
     full_oriented_molecules.push_back(rotated);
     local_count_each_molecule.at(mol_index)++;
     if (verbose) { // write out each rotated molecule for debugging
@@ -1154,37 +1116,11 @@ void construct_framework_from_alignment(
   // construct the framework - we just need to position them relative to each
   // other to achieve a framework new construction strategy 2013-10-18 - build
   // many frameworks, using each possible molecule-vertex alignment, and each of
-  // the two construction approaches; output whichever method gives us the lowest
-  // site deviation!
+  // the two construction approaches; output whichever method gives us the
+  // lowest site deviation!
   vector<ATOM_NETWORK> all_frameworks;
   vector<int> all_framework_assembly_methods;
   vector<double> all_max_site_deviations;
-
-  /* - this was moved up to be outside of this function, and the variable names
-  were changed accordingly - keeping this as a backup for now
-    //here we will check whether constructing with this alignment is possible
-  (based on the different kinds of connection sites that may be specified) bool
-  possible = true; int num_cons = two_way_connections.size(); for(int i=0;
-  i<num_cons && possible; i++) { CONNECTION c = two_way_connections.at(i);
-      MOLECULE m1 = full_oriented_molecules.at(c.v1);
-      MOLECULE m2 = full_oriented_molecules.at(c.v2);
-      int m1_site_index = m1.permutation.at(c.e1);
-      int m2_site_index = m2.permutation.at(c.e2);
-      int m1_atom_index = m1.sites.at(m1_site_index);
-      int m2_atom_index = m2.sites.at(m2_site_index);
-      if(m1.atoms_type.at(m1_atom_index)!=m2.atoms_type.at(m2_atom_index))
-  possible=false;
-    }
-    if(possible) printf("NOTICE (double check): this alignment should be
-  possible\n"); else printf("NOTICE (double check): this alignment should NOT be
-  possible\n");
-
-  //  for(int method=0; method<2 && possible; method++) { //for each alignment
-  option, we have two methods of construction to try for(int method=0; method<1
-  && possible; method++) { //DEBUG: net-based only
-  //  for(int method=1; method<2 && possible; method++) { //DEBUG:
-  connection-based only
-  */
 
   for (int method = 0; method < 2;
        method++) { // for each alignment option, we have two methods of
@@ -1281,12 +1217,13 @@ void construct_framework_from_alignment(
         }
         if (!collision ||
             bypass_collision_detection) { // if no collisions were incurred in
-                                          // this structure, we can determine the
-                                          // 'goodness', or rather the 'badness'
-                                          // of the achieved framework by looking
-                                          // at the maximum distance (respecting
-                                          // the periodic boundary) between sites
-                                          // that should be connected
+                                          // this structure, we can determine
+                                          // the 'goodness', or rather the
+                                          // 'badness' of the achieved framework
+                                          // by looking at the maximum distance
+                                          // (respecting the periodic boundary)
+                                          // between sites that should be
+                                          // connected
           if (verbose)
             printf(
                 "DEBUG: no collision was detected in the framework - this is a "

@@ -6,7 +6,6 @@
  *
  **/
 
-//#include "network.h"
 #include <cmath>
 #include <cstring>
 #include <fstream>

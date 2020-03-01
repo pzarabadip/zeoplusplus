@@ -657,54 +657,6 @@ std::string ATOM_NETWORK::returnChemicalFormula() {
 
 /* Determine the smallest supercell dimensions such that a sphere of a given
  * diameter does not overlap with itself across the periodic boundary */
-/* Marked for deletion
- TRIPLET getSmallestSupercell(double diam, ATOM_NETWORK *atmnet) {
- //1) set lower bound based on lengths of cell axes
- int na = 1+ (diam/atmnet->a);
- int nb = 1+ (diam/atmnet->b);
- int nc = 1+ (diam/atmnet->c);
-
- int fewest_cells = -1; //no supercell yet successful
- TRIPLET smallest_supercell(-1,-1,-1);
-
- //2) search all possible supercell sizes to find the smallest one satisfying
- // the minimum image convention for this radius
- TRIPLET lb(na, nb, nc);
- vector<TRIPLET> supercells;
- supercells.push_back(lb);
- while(supercells.size()>0) {
- //3) take the oldest candidate on the vector
- TRIPLET s = supercells.at(0); //oldest supercell candidate, s
- for(int i=0; i<supercells.size()-1; i++)
- supercells.at(i) = supercells.at(i+1); //shift vector up
- supercells.pop_back(); //delete last, which is now duplicated at last-1
- int num_cells = s.x*s.y*s.z;
- //4) is s a potential new smallest supercell?
- if(num_cells<fewest_cells || fewest_cells<0) {
- //5) does s satisfy the minimum image convention?
- int status = check_sphere_overlap(s.x, s.y, s.z, diam, atmnet);
- if(status==-1) {
- printf("WARNING: bad unit cell angles!\n");
- return smallest_supercell;
- } else if(status==1) { //acceptable!
- fewest_cells = num_cells;
- smallest_supercell = s;
- //printf("smallest satisfactory supercell so far: (%d %d %d) =
- //%d cells\n", s.a, s.b, s.c, num_cells);
- } else { //unacceptable - try larger supercells in each direction
- TRIPLET s2(s.x+1, s.y, s.z);
- TRIPLET s3(s.x, s.y+1, s.z);
- TRIPLET s4(s.x, s.y, s.z+1);
- supercells.push_back(s2);
- supercells.push_back(s3);
- supercells.push_back(s4);
- }
- }
- }
- return smallest_supercell;
- }
- * End: Marked for deletion
- */
 
 /// Default constructor
 VOR_EDGE::VOR_EDGE() {}
@@ -732,12 +684,6 @@ VOR_NODE::VOR_NODE(double myX, double myY, double myZ, double rad,
   atomIDs = ids;
 }
 
-// Copy constructor for VOR_NODE
-/*VOR_NODE::VOR_NODE(const VOR_NODE& orig):
-    x(orig.x), y(orig.y), z(orig.z),
-    rad_stat_sphere(orig.rad_stat_sphere), atomIDs(orig.atomIDs) {}
-    */
-
 /// Voronoi network constructor
 VORONOI_NETWORK::VORONOI_NETWORK() {}
 VORONOI_NETWORK::VORONOI_NETWORK(const XYZ &inp_va, const XYZ &inp_vb,
@@ -764,39 +710,6 @@ void VORONOI_NETWORK::copy(VORONOI_NETWORK *newNet) {
   newNet->nodes.clear();
   newNet->nodes = nodes;
 }
-
-/* Marked for deletion
- void VORONOI_NETWORK::filterVornetEdges(vector<int> nodeIDs,
- VORONOI_NETWORK *oldNet,
- VORONOI_NETWORK *newNet)
- {
- vector<bool> includeNodes = vector<bool>(oldNet->nodes.size(), false);
- for(unsigned int i = 0; i < nodeIDs.size(); i++){
- includeNodes[nodeIDs[i]] = true;
- }
-
- vector<VOR_NODE> newNodes = vector<VOR_NODE>();
- for(unsigned int i = 0; i < oldNet->nodes.size(); i++){
- newNodes.push_back(oldNet->nodes[i]);
- }
-
- vector<VOR_EDGE> newEdges = vector<VOR_EDGE>();
-
- for(unsigned int i = 0; i < oldNet->edges.size(); i++){
- VOR_EDGE edge = oldNet->edges[i];
- if(includeNodes[edge.from] && includeNodes[edge.to]){
- newEdges.push_back(edge);
- }
- }
-
- newNet->nodes = newNodes;
- newNet->edges = newEdges;
- newNet->v_a = oldNet->v_a;
- newNet->v_b = oldNet->v_b;
- newNet->v_c = oldNet->v_c;
- }
- * End: marked for deletion
- */
 
 /* Removes all the edges between nodes that are not both contained in nodeIDs.
  However, these nodes remain in the Voronoi network
@@ -945,41 +858,6 @@ const VORONOI_NETWORK VORONOI_NETWORK::prune(const double &minRadius) {
 /** Stores a copy of the original VORNOI_NETWORK into the other provided
  VORONOI_NETWORK but removes the edges that do not allow a sphere
  with the provided radius to pass. */
-/* Marked for deletion
- void pruneVoronoiNetwork(VORONOI_NETWORK *vornet,
- VORONOI_NETWORK *newVornet,
- double minRadius){
- newVornet->nodes = vornet->nodes;
-
- vector<VOR_EDGE>::iterator edgeIter = vornet->edges.begin();
- vector<VOR_EDGE> newEdges;
-
- // Add all edges whose radius is greater than the provided minimum to a list
- while(edgeIter != vornet->edges.end()){
- if(edgeIter->rad_moving_sphere > minRadius){
- VOR_EDGE newEdge;
- newEdge.from = edgeIter->from;
- newEdge.to   = edgeIter->to;
- newEdge.rad_moving_sphere = edgeIter->rad_moving_sphere;
- newEdge.delta_uc_x = edgeIter->delta_uc_x;
- newEdge.delta_uc_y = edgeIter->delta_uc_y;
- newEdge.delta_uc_z = edgeIter->delta_uc_z;
- newEdge.length = edgeIter->length;
- newEdges.push_back(newEdge);
- }
- edgeIter++;
- }
-
- // Copy edges that met requirement
- newVornet->edges = newEdges;
-
- // Copy unitcell vectors to new network
- newVornet->v_a = vornet->v_a;
- newVornet->v_b = vornet->v_b;
- newVornet->v_c = vornet->v_c;
- }
- * End: Marked for deletion
- */
 
 /** Stores a copy of the original VORNOI_NETWORK into the other provided
  *  VORONOI_NETWORK but removes the edges that are connected to specified
@@ -1698,8 +1576,8 @@ int check_sphere_overlap(int num_a, int num_b, int num_c, double diam,
                          ATOM_NETWORK *atmnet) {
   // check each neighbouring cell in three dimensions and find shortest distance
   // to image it is sufficient to check only those images (a b c) where the
-  // leftmost non-zero term is one, e.g. (0 1 -1) but we can skip (0 -1 1), since
-  // it is equivalent in magnitude
+  // leftmost non-zero term is one, e.g. (0 1 -1) but we can skip (0 -1 1),
+  // since it is equivalent in magnitude
   double min_d = -1.0; // set min distance to invalid quantity - if we cannot
                        // find any result we can return the error case
   bool overlaps = false;
@@ -2163,9 +2041,9 @@ bool find_two_way_connections(ATOM_NETWORK *cell,
     printf("DEBUG: there are %d two-way connections\n",
            num_two_way_connections);
   // 3) now we know all the two-way connections, we can recursively traverse
-  // until we establish whether the net is disconnected - we need to know this in
-  // order to avoid trying the connection-based assembly method later, only to
-  // find that it fails
+  // until we establish whether the net is disconnected - we need to know this
+  // in order to avoid trying the connection-based assembly method later, only
+  // to find that it fails
   vector<bool> visited_vertex;
   for (int i = 0; i < num_v; i++)
     visited_vertex.push_back(false);
@@ -2211,10 +2089,11 @@ vector<MOLECULE> get_multiple_best_RMSD_fits(MOLECULE mol, ATOM_NETWORK *cell,
     permute_base_dummy.push_back(i + num_fit_sites_no_dummy);
   vector<vector<int>> permutations_no_dummy, permutations_dummy;
 
-  permute(permute_base_no_dummy, 0,
-          &permutations_no_dummy); // fills in a vector with all possible
-                                   // permutations by which we can try and orient
-                                   // our two objects, e.g. (0123), (0132), ...
+  permute(
+      permute_base_no_dummy, 0,
+      &permutations_no_dummy); // fills in a vector with all possible
+                               // permutations by which we can try and orient
+                               // our two objects, e.g. (0123), (0132), ...
   permute(permute_base_dummy, 0, &permutations_dummy);
 
   // 2b) now collapse permutations for non-dummy and dummy together to get
@@ -2302,7 +2181,7 @@ vector<MOLECULE> get_multiple_best_RMSD_fits(MOLECULE mol, ATOM_NETWORK *cell,
       for (int j = 0; j < 3; j++)
         rotation_matrix[i][j] = 0; // dummy values - filled in by the rmsd
                                    // method
-    double rmsd = 0; // dummy value - filled in by the rmsd method
+    double rmsd = 0;               // dummy value - filled in by the rmsd method
     calculate_rotation_rmsd(
         fixed, moving, num_fit_sites, mov_com, mov_to_ref, rotation_matrix,
         &rmsd); // calling rmsd code - writes the corresponding rotation matrix
@@ -2823,15 +2702,18 @@ bool check_for_collision(ATOM_NETWORK *framework,
                      atom_molecule_id_vector.at(i));
             collision = true; // collision if they are bonded
           }
-        } else if (
-            multiple_periodic_connections_possible) { // else they are supposed
-                                                      // to be bonded - so we
-                                                      // need to make sure that
-                                                      // they are not bonded more
-                                                      // than once periodically,
-                                                      // if that is a possibility
-                                                      // given the unit cell
-                                                      // parameters
+        } else if (multiple_periodic_connections_possible) { // else they are
+                                                             // supposed to be
+                                                             // bonded - so we
+                                                             // need to make
+                                                             // sure that they
+                                                             // are not bonded
+                                                             // more than once
+                                                             // periodically, if
+                                                             // that is a
+                                                             // possibility
+                                                             // given the unit
+                                                             // cell parameters
           XYZ shift_i_to_centre =
               centre_abc - trans_to_origuc(atom_abc_vector.at(i));
           XYZ uc_j = trans_to_origuc(atom_abc_vector.at(j) + shift_i_to_centre);
@@ -2885,7 +2767,7 @@ bool check_for_collision(ATOM_NETWORK *framework,
           collision =
               true; // if either atom is not part of a site, this is a collision
         } else {    // else they are both part of sites - so we need to check
-                 // whether these molecules are supposed to be connected
+                    // whether these molecules are supposed to be connected
           bool mols_connected = false;
           for (int k = 0; k < num_c && !mols_connected; k++) {
             CONNECTION c = two_way_connections->at(k);
@@ -2965,8 +2847,8 @@ bool read_cgd(FILE *cgd, ATOM_NETWORK *cell, string *net) {
       // do nothing on this empty line, just skip to next line
     } else if (token.at(0) == "name" || token.at(0) == "NAME" ||
                token.at(0) == "id" || token.at(0) == "ID") {
-      if (num_tokens > 1) { // read from this line if there are fields, else
-                            // read from next line...
+      if (num_tokens > 1) {   // read from this line if there are fields, else
+                              // read from next line...
         (*net) = token.at(1); // returning
       } else
         anticipating_name = true;
@@ -2982,9 +2864,10 @@ bool read_cgd(FILE *cgd, ATOM_NETWORK *cell, string *net) {
       } else
         anticipating_cell = true;
     } else if (anticipating_cell &&
-               num_tokens > 5) { // right now potential line breaks between cell
-                                 // definition and data fields are only handled
-                                 // when all the data fields are on the same line
+               num_tokens >
+                   5) { // right now potential line breaks between cell
+                        // definition and data fields are only handled
+                        // when all the data fields are on the same line
       parse_cell(&token, 0, cell);
       anticipating_cell = false;
     } else if (token.at(0) == "group" || token.at(0) == "GROUP") {
@@ -3004,9 +2887,10 @@ bool read_cgd(FILE *cgd, ATOM_NETWORK *cell, string *net) {
       } else
         anticipating_atom = true;
     } else if (anticipating_atom &&
-               num_tokens > 4) { // right now potential line breaks between atom
-                                 // definition and data fields are only handled
-                                 // when all the data fields are on the same line
+               num_tokens >
+                   4) { // right now potential line breaks between atom
+                        // definition and data fields are only handled
+                        // when all the data fields are on the same line
       parse_atom(&token, 0, cell, &atom_index, &line_num, line, cgd);
       anticipating_atom = false;
     } else if (token.at(0) == "node" ||
@@ -3019,9 +2903,10 @@ bool read_cgd(FILE *cgd, ATOM_NETWORK *cell, string *net) {
       } else
         anticipating_node = true;
     } else if (anticipating_node &&
-               num_tokens > 4) { // right now potential line breaks between node
-                                 // definition and data fields are only handled
-                                 // when all the data fields are on the same line
+               num_tokens >
+                   4) { // right now potential line breaks between node
+                        // definition and data fields are only handled
+                        // when all the data fields are on the same line
       parse_node(&token, 0, cell, &atom_index);
       anticipating_node = false;
     } else if (token.at(0) == "edge" ||
@@ -3237,14 +3122,14 @@ void parse_edge(vector<string> *token, int first_index, ATOM_NETWORK *cell,
              "parsed vertex - creating an orphan edge to temporarily store "
              "this start/end until its true position by symmetry is known\n");
     // this is a specific scenario - the cgd file contains a definition of an
-    // edge, for which the end point is not a basic vertex - normally this is the
-    // default case, but for this cgd format the edges are not given exhaustively
-    // and so we need to know of each edge in both directions in order to
-    // construct the complete net including symmetry operations upon these edges
-    // accordingly, we need to store this orphan edge, by saving its start and
-    // end in the cell as an orphan - this vertex is the symmetry image of some
-    // basic vertex, and we will assign this orphaned edge to that vertex when we
-    // know it
+    // edge, for which the end point is not a basic vertex - normally this is
+    // the default case, but for this cgd format the edges are not given
+    // exhaustively and so we need to know of each edge in both directions in
+    // order to construct the complete net including symmetry operations upon
+    // these edges accordingly, we need to store this orphan edge, by saving its
+    // start and end in the cell as an orphan - this vertex is the symmetry
+    // image of some basic vertex, and we will assign this orphaned edge to that
+    // vertex when we know it
     cell->orphan_edge_starts.push_back(end);
     cell->orphan_edge_ends.push_back(start);
   } else {
@@ -3260,8 +3145,8 @@ void add_missing_edges(
     ATOM_NETWORK
         *cell) { // this function is called when the vertices in a cell do not
                  // have the correct number of edges, due to edges not being
-                 // provided exhaustively in the input file - we need to add them
-                 // in by looking at symmetry!
+                 // provided exhaustively in the input file - we need to add
+                 // them in by looking at symmetry!
   bool verbose = false;
   int num_vertices = cell->vertices.size();
   for (int i = 0; i < num_vertices; i++) {
@@ -3286,7 +3171,8 @@ void add_missing_edges(
         printf("\tDEBUG: edges read were as follows:\n");
       vector<XYZ> new_edges_abc,
           new_edges_xyz; // a new vector of edges - fill it up and hopefully it
-                         // will be the right length, once duplicates are removed
+                         // will be the right length, once duplicates are
+                         // removed
       for (int j = 0; j < num_edges; j++) {
         XYZ this_read_edge = v.edges.at(
             j); // the jth edge that was read - add it to the new vector if it
@@ -3374,8 +3260,8 @@ void add_missing_edges(
                             // valid unless they overlap in xyz!
               }
               if (!this_sym_edge_is_dupe) { // the kth symmetry image of the jth
-                                            // read edge is not a duplicate - add
-                                            // it to the vector
+                                            // read edge is not a duplicate -
+                                            // add it to the vector
                 new_edges_abc.push_back(this_sym_edge);
                 new_edges_xyz.push_back(sym_edge_xyz);
                 if (verbose)
@@ -3416,7 +3302,8 @@ void add_missing_edges(
               "just this information - need to consider any orphan vertices\n",
               num_expect_edges, num_new_edges);
         // this is where we need the orphan edges - they may start at symmetry
-        // images of this vertex, and if they do, we can use the orphan edge here
+        // images of this vertex, and if they do, we can use the orphan edge
+        // here
         int num_orphan_edges = cell->orphan_edge_starts.size();
         int num_orphan_edges_check = cell->orphan_edge_ends.size();
         if (num_orphan_edges_check != num_orphan_edges) {
@@ -3443,8 +3330,8 @@ void add_missing_edges(
             XYZ this_sym_orphan_vertex = equiv_orphan_vertices.at(k);
             if (overlaps_abc(this_sym_orphan_vertex, v.abc,
                              cell)) { // this image of the orphan vertex
-                                      // overlaps with the basic vertex - it is a
-                                      // candidate for a missing edge
+                                      // overlaps with the basic vertex - it is
+                                      // a candidate for a missing edge
               if (verbose)
                 printf("DEBUG: orphan vertex ID %d at %.3f %.3f %.3f has a "
                        "symmetry image at %.3f %.3f %.3f which overlaps with "
@@ -3493,9 +3380,9 @@ void add_missing_edges(
                               // are valid unless they overlap in xyz!
                 }
                 if (!this_sym_orphan_edge_is_dupe) { // the kth symmetry image
-                                                     // of the jth orphan edge is
-                                                     // not a duplicate - add it
-                                                     // to the vector
+                                                     // of the jth orphan edge
+                                                     // is not a duplicate - add
+                                                     // it to the vector
                   if (verbose)
                     printf("\t\t\tDEBUG: this orphan edge is unique\n");
                   new_edges_abc.push_back(this_sym_orphan_edge);
@@ -3556,8 +3443,8 @@ void add_missing_edges(
 void add_2c_vertices_and_normal_edges(
     ATOM_NETWORK *cell) { // just add the 2-c vertices and normal edges - dummy
                           // edges are handled later, once we know all the
-                          // vertices by symmetry, and can make a better guess of
-                          // the orthogonal direction of the 2-c vertices
+                          // vertices by symmetry, and can make a better guess
+                          // of the orthogonal direction of the 2-c vertices
   bool verbose = false;
   if (verbose)
     printf("augmenting underlying net with 2-c vertices\n");
@@ -3663,8 +3550,8 @@ void add_2c_dummy_edges(
           exit(EXIT_FAILURE);
         }
         // we need to know which two vertices (in the full cell) this 2-c vertex
-        // is connected to, so that we can look at their other edges and decide a
-        // direction
+        // is connected to, so that we can look at their other edges and decide
+        // a direction
         int v1 = -1, v2 = -1;
         int e1 = -1, e2 = -1;
         for (int j = 0; j < num_two_way_connections && (v1 == -1 || v2 == -1);
@@ -3858,8 +3745,8 @@ void add_2c_dummy_edges(
                       non_parallel_direction_found = true;
                     } else if (!parallel_direction_found) {
                       // else parallel; harder case - take the cross product of
-                      // either, say 1; save one of these only, in case we do not
-                      // find a parallel one
+                      // either, say 1; save one of these only, in case we do
+                      // not find a parallel one
                       XYZ dummy_vector_norm = (this_edge_vector.unit().cross(
                                                    projection_1_vector_norm))
                                                   .unit();
@@ -3908,8 +3795,8 @@ void add_2c_dummy_edges(
         full_cell->vertices.at(i).dummy_edges.push_back(dummy_edge_abc);
         basic_cell->vertices.at(basic_ID).dummy_edges.push_back(dummy_edge_abc);
       } else { // else this vertex is a symmetry image of another - in that case
-               // we can use this info to assign the orientation based on that of
-               // the underlying vertex
+               // we can use this info to assign the orientation based on that
+               // of the underlying vertex
         XYZ test_dummy_e = basic_cell->vertices.at(basic_ID).dummy_edges.at(0);
         vector<XYZ> equiv_dummy_e =
             GetEquivalentPositions(basic_cell->sym_ID, &test_dummy_e);
@@ -4191,11 +4078,10 @@ void read_xyz(FILE *input, MOLECULE *mol, const char *filename) {
       // \"%s\"\n", ch, str.c_str());
       int pos = 0;
       char c = str[pos];
-      while (
-          c <=
-          0) { // for some reason, xyz files from marvinsketch have three
-               // characters at the beginning with ascii codes <0 - very strange,
-               // but we need to remove these to succesfully parse any data
+      while (c <= 0) { // for some reason, xyz files from marvinsketch have
+                       // three characters at the beginning with ascii codes <0
+                       // - very strange, but we need to remove these to
+                       // succesfully parse any data
         pos++;
         c = str[pos];
       }

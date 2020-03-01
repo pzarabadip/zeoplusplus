@@ -1,4 +1,3 @@
-//#include "network.h"
 #include "channel.h"
 #include <cmath>
 
@@ -892,166 +891,6 @@ void CHANNEL::findChannels(DIJKSTRA_NETWORK *dnet, vector<bool> *infoStorage,
   };
   pores.clear();
 }
-/* below is an old version before PORE class was introducedd */
-/*
- void CHANNEL::findChannels(DIJKSTRA_NETWORK *dnet, vector<bool> *infoStorage,
- vector<CHANNEL> *channels)
- {
- //Define three access types
- const int ACCESSIBLE   =  1;
- const int INACCESSIBLE =  0;
- const int UNKNOWN      = -1;
-
- vector<DELTA_POS> directions = vector<DELTA_POS> ();
-
- // Initialize the status of each node as UNKNOWN
- vector<int> accessStatuses = vector<int> (dnet->nodes.size(), UNKNOWN);
- unsigned int nodeIndex = 0;
-
- // Iterate over all nodes
- while(nodeIndex != accessStatuses.size()){
- //Skip node if access status already determined
- if(accessStatuses.at(nodeIndex) != UNKNOWN){
- nodeIndex++;
- continue;
- }
-
- // Start out with 0-dimensional channel w/o any basis vectors
- int dim = 0;
- int basis [3][3] = {{0,0,0},
- {0,0,0},
- {0,0,0}};
-
- // Place starting node on stack with (0,0,0) displacement
- int accessStatus = UNKNOWN;
- DELTA_POS displacement = DELTA_POS(0,0,0);
- map<int,DELTA_POS> visitedNodeDisplacement;
- vector<pair<int,DELTA_POS> > stack;
- stack.push_back(pair<int,DELTA_POS> (nodeIndex,displacement));
- visitedNodeDisplacement.insert(pair<int,DELTA_POS>(nodeIndex, displacement));
-
- while(stack.size() != 0){
- // Remove top-most node
- pair<int,DELTA_POS> nodeInfo = stack.back();
- DIJKSTRA_NODE currentNode = dnet->nodes.at(nodeInfo.first);
- stack.pop_back();
-
- // Follow all edges leading to adjoining nodes
- vector<CONN>::iterator connIter = currentNode.connections.begin();
- while(connIter != currentNode.connections.end()){
- int to = connIter->to;
- DELTA_POS newDisplacement = nodeInfo.second + connIter->deltaPos;
- int localAccessStatus = accessStatuses.at(to);
-
- if(localAccessStatus == UNKNOWN){
- map<int,DELTA_POS>::iterator visitedNode = visitedNodeDisplacement.find(to);
- if(visitedNode != visitedNodeDisplacement.end()){
- if(visitedNode->second.equals(newDisplacement)){
- // Circling back to previous node
- // Do nothing
- }
- else{
- // Nodes are ACCESSIBLE b/c same node visited in different unit cell
- accessStatus = ACCESSIBLE;
- DELTA_POS direction = newDisplacement - visitedNode->second;
-
-
- // ******* Start of Michael's code ******
- if(dim == 0){
- basis[0][0] = direction.x;
- basis[1][0] = direction.y;
- basis[2][0] = direction.z;
- dim++;
- }
- else if (dim == 1){
- double v;
-
- if (basis[0][0] != 0) v = 1.0*direction.x/basis[0][0];
- else if (basis[1][0] != 0) v = 1.0*direction.y/basis[1][0];
- else if (basis[2][0] != 0) v = 1.0*direction.z/basis[2][0];
- else {
- cerr << "Error: Channel basis vector is zero vector. Exiting..." << "\n";
- exit(1);
- }
-
- if(!(basis[0][0]*v == direction.x && basis[1][0]*v == direction.y &&
- basis[2][0]*v == direction.z)){
- basis[0][1] = direction.x;
- basis[1][1] = direction.y;
- basis[2][1] = direction.z;
- dim++;
- }
- }
- else if (dim == 2){
- basis[0][2] = direction.x;
- basis[1][2] = direction.y;
- basis[2][2] = direction.z;
- if(abs(calcDeterminant(basis)) < 1e-8){
- basis[0][2] = basis[1][2] = basis[2][2] = 0;
- }
- else
- dim++;
- }
- // ****** End of Michael's code ******
- }
- }
- else{
- // Node being visited for the first time
- visitedNodeDisplacement.insert(pair<int,DELTA_POS>(to, newDisplacement));
- stack.push_back(pair<int,DELTA_POS> (to, newDisplacement));
- }
- }
- else{
- // The status of a region should be determined
- // with all of its neighbors. Otherwise, all possible nodes
- // were not explored.
- cerr << "Error: Illogical result  when attempting to identify channels." <<
- "\n"; cerr << "Please contact the source code provider with your program input.
- " << "\n"; cerr << "Exiting ..." << "\n"; exit(1);
- }
- connIter++;
- }
- }
-
- // All connected nodes are inaccessible if their status is still UNKNOWN
- if((stack.size() == 0) && (accessStatus == UNKNOWN))
- accessStatus = INACCESSIBLE;
-
- // Record the access status for each node in the cycle and create
- // a list of the node ids for channel identification
- map<int,DELTA_POS>::iterator resultIter = visitedNodeDisplacement.begin();
- vector<int> listOfIDs = vector<int> ();
- while(resultIter != visitedNodeDisplacement.end()){
-
- int nodeID = resultIter->first;
- if(accessStatuses.at(nodeID) != UNKNOWN){
- // Each node should only have its accessibility determined once
- cerr << "Error: Accessibility of node was determined more than once." << "\n";
- cerr << "Please contact the source code provider with your program input. " <<
- "\n"; cerr << "Exiting ..." << "\n"; exit(1);
- }
- else{
- // Store node's status
- accessStatuses.at(nodeID) = accessStatus;
- listOfIDs.push_back(nodeID);
- }
- resultIter++;
- }
- nodeIndex++;
-
- // Create CHANNEL from ACCESSIBLE nodes
- if(accessStatus == ACCESSIBLE){
- channels->push_back(CHANNEL(listOfIDs, dnet, dim, basis));
- //output << dim << " ";
- }
- }
- // Store information in provided vector
- infoStorage -> resize(accessStatuses.size());
- for(unsigned int i = 0; i < accessStatuses.size(); i++){
- infoStorage -> at(i) = (accessStatuses.at(i) == ACCESSIBLE);
- }
- }
- */
 
 /*  Voronoi nodes within the provided VORONOI_NETWORK can be classified as
  * either accessible or inaccessible, where sets of accessible  nodes constitute
@@ -1656,22 +1495,6 @@ void PORE::getRestrictingDiameters(int nSegments, vector<int> vorNetID,
   //    for(int i=0; i<nSegments; i++) segmentDiFinal->at(i) = segmentDi->at(i);
   //    // copying current segments into Final
 
-  /* old stuff to be removed
-      // Start analysis for node of id = nodeid
-
-      nodeIndex = node1; // node1 is w.r.t pore node index (use PORE
-   reverseMapping to retrieve original node
-
-      // accept the initial node
-      di=lnodes.at(nodeIndex).max_radius;
-      df=lnodes.at(nodeIndex).max_radius;
-
-      accessStatuses[nodeIndex] = ACCESSED;
-
-      directions[nodeIndex] = DELTA_POS(0,0,0);
-
-   ends old stuff */
-
   compareConnections_ptr = &lnodes;
   HEAP<pair<int, int>> stack(compareConnections);
 
@@ -1781,16 +1604,6 @@ void PORE::getRestrictingDiameters(int nSegments, vector<int> vorNetID,
         // both nodes are of the same segment, do nothing
       };
 
-      /* old stuff, probably to be removed
-       if(!(directions[best_node]).equals(directions[best.first] +
-       lnodes[best.first].connections.at(best.second).deltaPos))
-       {
-           // if nodes are in different unit cells (a loop is found); just
-       update df and continue
-           if(df>nodes[best.first].connections.at(best.second).max_radius)
-       df=nodes[best.first].connections.at(best.second).max_radius;
-       };
-      */
     }
 
     else {

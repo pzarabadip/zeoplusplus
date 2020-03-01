@@ -1,55 +1,7 @@
-//#include "network.h"
 
 #include "segment.h"
 
 using namespace std;
-
-// void segmentChannels(VORONOI_NETWORK *vornet, float probeRad, vector<bool>
-// *accessInfo, char *name) {
-// accessInfo tells if a node i is accesible or not (after channel detection)
-
-// calling nodes: vornet->nodes.at(i).x  radii:
-// vornet->nodes.at(i).rad_stat_sphere calling edges:
-// vornet->edges.at(i).rad_moving_sphere  vornet->edges.at(i).to
-// vornet->edges.at(i).from
-//                vornet->edges.at(i).length
-
-/*
-class SEGMENT_CONNECTION{
-  int seg_from, seg_to;
-  int node_from, node_to;
-};
-
-
-class SEGMENT{
-  int id;                            // SEGMENT id
-  CHANNEL *parent;                   // Pointer to parent
-  map<int,int> idMappings;           // (node id, new index) pairs
-  map<int,int> reverseIDMappings;    // (new index, node id) pairs
-  vector<DIJKSTRA_NODE> nodes;       // List of nodes in SEGMENT indexed by new
-index vector<CONN> connections;          // List of connections between nodes
-contained in same SEGMENT
-
-  SEGMENT(vector<int> nodeIDs, DIJKSTRA_NETWORK *dnet, CHANNEL *parent){
-    for(int i = 0; i < nodeIDs.size(); i++){
-      DIJKSTRA_NODE oldNode = dnet->nodes[nodeIDs[i]];
-      idMappings.insert(pair<int, int> (oldNode.id, i));
-      reverseIDMappings.insert(pair<int,int>(i, oldNode.id));
-    }
-
-  }
-
-};
-*/
-
-/*
-void createSegments(CHANNEL chan){
-  vector<double> segmentList;
-  chan.segmentChannel();
-  segmentList.insert(segmentList.begin(),chan.segment_max_r.begin(),chan.segment_max_r.end());
-
-}
-*/
 
 void segmentChannels(ATOM_NETWORK *uc, vector<FEATURE> *channel_list,
                      ostream &output) {
