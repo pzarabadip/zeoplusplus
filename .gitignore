@@ -1,0 +1,6 @@
+*.o
+network
+framework_builder
+molecule_to_abstract
+voro++/*
+
